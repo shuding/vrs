@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "dev": "next --p 8080",
+    "build": "next build",
+    "start": "next start --p 8080"
+  },
+  "dependencies": {
+    "next": "^2.3.1",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4"
+  }
+}
