@@ -3,8 +3,11 @@
  */
 
 import Layout from '../components/Layout'
+import Slider from '../components/Slider'
 
 export default () =>
   <Layout>
-    <div>hello, world</div>
+    <section>
+      <Slider/>
+    </section>
   </Layout>
