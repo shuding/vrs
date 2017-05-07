@@ -1,3 +1,7 @@
+# VRS
+
+TODO: 后端，前端逻辑层，NextJS 路由（？），聊天室（？？）
+
 ## Quickstart
 开发环境：`yarn dev` / `npm run dev`
 产品环境：`yarn start` / `npm start`

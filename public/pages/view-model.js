@@ -24,8 +24,8 @@ class ViewModel extends Component {
     this.toggleGrid = this.toggleGrid.bind(this)
   }
   componentDidMount() {
-    this.width = Math.min(window.innerWidth, 600)
-    this.height = ~~(this.width / 4 * 3)
+    this.width = Math.min(window.innerWidth, 800)
+    this.height = ~~(this.width / 16 * 9)
 
     this.initResources()
     this.initThree()
@@ -33,18 +33,46 @@ class ViewModel extends Component {
       .then(scene => {
         this.scene = scene
 
+        let bBox = new THREE.Box3().setFromObject(this.scene)
+        let height = bBox.getSize().y
+        let dist = height / (2 * Math.tan(this.camera.fov * Math.PI / 360))
+        let pos = scene.position
+        pos = pos.clone()
+        pos.y += height / 2
+
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement)
+        this.controls.addEventListener('change', this.tick)
+        this.controls.enableZoom = true
+        this.controls.target.set(pos.x, pos.y, pos.z)
+
+        this.camera.position.set(pos.x, pos.y, dist * 1.2)
+        this.camera.lookAt(pos)
+
         // add light
-        let light = new THREE.DirectionalLight(0xeeeeee)
-        light.position.set(1, 1, 1)
+        let light = new THREE.DirectionalLight(0x666666)
+        light.position.set(50, 50, 50)
         this.scene.add(light)
 
-        let effect = new THREE.RenderPass(this.scene, this.camera)
-        this.composer.addPass(effect)
+        this.scene.add(new THREE.AmbientLight(0xbbbbbb))
 
-        effect = new THREE.ShaderPass(THREE.EdgeShader)
-        effect.uniforms.aspect.value = new THREE.Vector2(800, 800)
-        effect.renderToScreen = true
-        this.composer.addPass(effect)
+        // let effect = new THREE.RenderPass(this.scene, this.camera)
+        // this.composer.addPass(effect)
+        //
+        // effect = new THREE.ShaderPass(THREE.EdgeShader)
+        // effect.uniforms.aspect.value = new THREE.Vector2(800, 800)
+        // effect.renderToScreen = true
+        // this.composer.addPass(effect)
+
+        this.wireFrameMaterial = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true})
+        this.defaultMaterials = []
+
+        let index = 0
+        scene.children[0].traverse((child) => {
+          if (child instanceof THREE.Mesh){
+            this.defaultMaterials[index++] = child.material
+          }
+          scene.children[0].needsUpdate = true
+        })
 
         this.tick()
       })
@@ -66,10 +94,6 @@ class ViewModel extends Component {
 
     this.camera = new THREE.PerspectiveCamera(5, width / height, 1, 10000)
     this.camera.position.z = 100
-
-    this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement)
-    this.controls.addEventListener('change', this.tick)
-    this.controls.enableZoom = true
   }
   loadModel() {
     const loader = new THREE.ObjectLoader()
@@ -80,19 +104,30 @@ class ViewModel extends Component {
     })
   }
   tick() {
-    if (this.grid) {
-      this.renderer.clear()
-      this.composer.render()
-    } else {
-      this.renderer.render(this.scene, this.camera)
-    }
+    // render one frame
+    this.renderer.render(this.scene, this.camera)
   }
+
   toggleGrid() {
     this.grid = !this.state.grid
+
+    let index = 0
+    this.scene.children[0].traverse((child) => {
+      if (child instanceof THREE.Mesh){
+        if (this.grid) {
+          child.material = this.wireFrameMaterial
+        } else {
+          child.material = this.defaultMaterials[index++]
+        }
+      }
+      this.scene.children[0].needsUpdate = true
+    })
+
     this.tick()
 
     this.setState({ grid: !this.state.grid })
   }
+
   render() {
     return <Layout>
       <Head>
@@ -107,6 +142,10 @@ class ViewModel extends Component {
         <p className="dib f4 v-mid">A Cabin</p>
         <div className="tc flex viewer-container">
           <div className="sidebar ph3">
+            <a className={`no-underline black hover-gray inline-flex items-center tc pa3 mb3 ba ${this.state.vr ? '' : 'b--transparent'}`} href="javascript:;" title="Show wireframe">
+              <i className="material-icons">3d_rotation</i>
+              <span className="f6 ml3 pr2">{ this.state.vr ? 'Turn off' : 'Turn on'} VR mode (TODO)</span>
+            </a>
             <a className={`no-underline black hover-gray inline-flex items-center tc pa3 mb3 ba ${this.state.grid ? '' : 'b--transparent'}`} href="javascript:;" title="Show wireframe" onClick={this.toggleGrid}>
               <i className="material-icons">grid_on</i>
               <span className="f6 ml3 pr2">{ this.state.grid ? 'Hide' : 'Show'} wireframe</span>
@@ -117,7 +156,7 @@ class ViewModel extends Component {
             className="mw-100 h-auto view-canvas mb3"/>
           <div className="sidebar purchase ph3 tc flex flex-column">
             <dl className="db dib-l w-auto-l lh-title tc">
-              <dd className="f6 fw4 ml0">Model</dd>
+              <dd className="f6 fw4 ml0">Model (DEMO!)</dd>
               <dd className="f2 f-subheadline-l fw6 ml0">$35</dd>
             </dl>
             <div className="mv4">- - -</div>
