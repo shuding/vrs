@@ -25,5 +25,11 @@ module.exports = {
       use: ['babel-loader', 'raw-loader', 'postcss-loader', 'less-loader']
     })
     return config
-  }
+  },
+  routes: [
+    {
+      path: '/model/:id',
+      file: '/model'
+    }
+  ]
 }
