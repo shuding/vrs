@@ -4,7 +4,7 @@
 
 import { Component } from 'react'
 import 'react-dom'
-import _ from 'lodash'
+import throttle from 'lodash/throttle'
 
 const PI_2 = Math.PI * 2
 const X_CNT = 30, Y_CNT = 30, SCALE = 200
@@ -94,14 +94,14 @@ class SliderWave extends Component {
 
     let widthHalf = window.innerWidth / 2
     let heightHalf = window.innerWidth / 2
-    window.addEventListener('resize', _.debounce(() => {
+    window.addEventListener('resize', throttle(() => {
       widthHalf = window.innerWidth / 2
       heightHalf = window.innerWidth / 2
 
       this.camera.aspect = window.innerWidth / window.innerHeight
       this.camera.updateProjectionMatrix()
       this.renderer.setSize(window.innerWidth, window.innerHeight)
-    }, 100), false)
+    }, 100, false), false)
     window.document.addEventListener('mousemove', ev => {
       this.x = ev.pageX - widthHalf
       this.y = ev.pageY - heightHalf - window.scrollY

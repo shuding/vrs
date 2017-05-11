@@ -7,16 +7,27 @@ const THREE = require('three/build/three')
 global.THREE = THREE
 
 // three.js polyfills
+require('three/examples/js/Mirror')
 require('three/examples/js/renderers/Projector')
 require('three/examples/js/renderers/CanvasRenderer')
 require('three/examples/js/shaders/CopyShader')
 require('three/examples/js/shaders/DotScreenShader')
 require('three/examples/js/shaders/RGBShiftShader')
 require('three/examples/js/shaders/EdgeShader')
+require('three/examples/js/shaders/FilmShader')
+require('three/examples/js/shaders/VignetteShader')
+require('three/examples/js/shaders/DigitalGlitch')
+require('three/examples/js/shaders/ToneMapShader')
+require('three/examples/js/shaders/SSAOShader')
+require('three/examples/js/shaders/HorizontalBlurShader')
+require('three/examples/js/shaders/VerticalBlurShader')
 require('three/examples/js/postprocessing/EffectComposer')
 require('three/examples/js/postprocessing/RenderPass')
 require('three/examples/js/postprocessing/MaskPass')
 require('three/examples/js/postprocessing/ShaderPass')
+require('three/examples/js/postprocessing/FilmPass')
+require('three/examples/js/postprocessing/GlitchPass')
+require('three/examples/js/postprocessing/DotScreenPass')
 require('three/examples/js/controls/OrbitControls')
 
 import Link from 'next/link'

@@ -135,11 +135,6 @@ class ViewModel extends Component {
       </Head>
 
       <article className="pt5 bg-white ph3">
-        <Link href="/store"><a className="link black hover-gray tl dib">
-          <p><i className="material-icons md-36 v-mid">store</i></p>
-        </a></Link>
-        <i className="material-icons md-24 v-mid mh2">keyboard_arrow_right</i>
-        <p className="dib f4 v-mid">A Cabin</p>
         <div className="tc flex viewer-container">
           <div className="sidebar ph3">
             <a className={`no-underline black hover-gray inline-flex items-center tc pa3 mb3 ba ${this.state.vr ? '' : 'b--transparent'}`} href="javascript:;" title="Show wireframe">

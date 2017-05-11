@@ -23,6 +23,7 @@ export default class ShowBox extends Component {
 
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true })
     this.renderer.setClearColor(0x000000, 0)
+    // for backgrounds, just use 1:1 pixel ratio for the perf reason
     this.renderer.setPixelRatio(1)//window.devicePixelRatio)
     this.renderer.setSize(width, height)
 

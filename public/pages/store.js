@@ -10,10 +10,10 @@ import Footer from '../components/Footer'
 export default () =>
   <Layout>
     <article className="pt5 bg-white ph3">
-      <Link href="/store"><a className="link black hover-gray tc">
+      <a className="link black tc">
         <p><i className="material-icons md-48 v-top">store</i></p>
         <h1 className="tc f3 mb4">Model Store</h1>
-      </a></Link>
+      </a>
       <h2 className="f4 fw4 pa3 mv0 tc"><i className="material-icons red">fiber_new</i></h2>
       <div className="cf pa2">
         <div className="fl w-50 w-25-m w-20-l pa2">
