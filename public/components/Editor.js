@@ -47,6 +47,36 @@ THREE.FilmShader.fragmentShader = [
   "}"
 ].join("\n")
 
+THREE.StereoEffect = function ( renderer, composer ) {
+  var _stereo = new THREE.StereoCamera()
+  _stereo.aspect = 0.5
+  this.setEyeSeparation = function ( eyeSep ) {
+    _stereo.eyeSep = eyeSep
+  }
+  this.setSize = function ( width, height ) {
+    renderer.setSize( width, height )
+  }
+  this.render = function ( scene, camera ) {
+    scene.updateMatrixWorld()
+    if ( camera.parent === null ) camera.updateMatrixWorld()
+    _stereo.update( camera )
+    var size = renderer.getSize()
+    if (renderer.autoClear) renderer.clear()
+    renderer.setScissorTest(true)
+    renderer.setScissor(0, 0, size.width / 2, size.height)
+    renderer.setViewport(0, 0, size.width / 2, size.height)
+    renderer.render(scene, _stereo.cameraL)
+    // renderer.compile(scene, _stereo.cameraL)
+    // composer.render(0.01)
+
+    renderer.setScissor(size.width / 2, 0, size.width / 2, size.height)
+    renderer.setViewport(size.width / 2, 0, size.width / 2, size.height)
+    renderer.render(scene, _stereo.cameraR)
+    // renderer.compile(scene, _stereo.cameraR)
+    // composer.render(0.01)
+  }
+}
+
 // the main component which renders a highly customized threejs model viewer
 
 class Editor extends Component {
@@ -69,6 +99,7 @@ class Editor extends Component {
     this.rotateToTopView = this.rotateToTopView.bind(this)
     this.switchToWireframe = this.switchToWireframe.bind(this)
     this.switchToModel = this.switchToModel.bind(this)
+    this.switchToVR = this.switchToVR.bind(this)
     this.selectObject = this.selectObject.bind(this)
     // this.autofocus = this.autofocus.bind(this)
     this.renderLoop = this.renderLoop.bind(this)
@@ -100,6 +131,10 @@ class Editor extends Component {
     camera.aspect = width / height
     camera.updateProjectionMatrix()
     renderer.setSize(width, height)
+
+    if (this.stereoEffect) {
+      this.stereoEffect.setSize(width, height)
+    }
   }
 
   // initializations
@@ -221,9 +256,12 @@ class Editor extends Component {
   }
   initEffects() {
     const { scene, camera, renderer } = this.three
-    const composer = new THREE.EffectComposer(renderer)
 
-    let effect = new THREE.RenderPass(scene, camera)
+    renderer.setScissor(0, 0, window.innerWidth, window.innerHeight)
+    const composer = new THREE.EffectComposer(renderer)
+    let effect
+
+    effect = new THREE.RenderPass(scene, camera)
     composer.addPass(effect)
 
     effect = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 1.1, 0.95)
@@ -259,22 +297,30 @@ class Editor extends Component {
     // effect.renderToScreen = true
     // composer.addPass(effect)
 
-    if (this.wireframe) {
+    if (this.wireframe || this.vr) {
       effect = new THREE.ShaderPass(THREE.RGBShiftShader)
       effect.uniforms.amount.value = 0.0007
       composer.addPass(effect)
     }
 
-    if (this.wireframe) {
+    if (this.wireframe || this.vr) {
       effect = new THREE.FilmPass(0.25, 0.4, 1500, false)
       composer.addPass(effect)
     }
 
     effect = new THREE.ShaderPass(THREE.VignetteShader)
     effect.uniforms["offset"].value = 0.5
-    effect.uniforms["darkness"].value = 4
+    effect.uniforms["darkness"].value = this.vr ? 6 : 4
     effect.renderToScreen = true
     composer.addPass(effect)
+
+    if (this.vr) {
+      const stereoEffect = new THREE.StereoEffect(renderer, composer)
+      stereoEffect.setSize(window.innerWidth, window.innerHeight)
+      this.stereoEffect = stereoEffect
+    }
+
+    // composer.addPass(effect)
 
     // let outlinePass = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera)
     // outlinePass.edgeStrength = 3.0
@@ -507,9 +553,10 @@ class Editor extends Component {
       z: initialPosition.z * 0.1
     }, 800).start()
   }
-  switchToWireframe() {
-    if (!this.wireframe) {
+  switchToWireframe(ev = {}) {
+    if (!this.wireframe || this.vr || ev.forceVR) {
       this.wireframe = true
+      this.vr = !!ev.forceVR
 
       const { scene } = this.three
       this.objects.forEach(object => {
@@ -526,12 +573,14 @@ class Editor extends Component {
       // this.shapeObjects.forEach(object => scene.add(object))
 
       this.initEffects()
+      this.handleResize()
       this.setState({})
     }
   }
-  switchToModel() {
-    if (this.wireframe) {
+  switchToModel(ev = {}) {
+    if (this.wireframe || this.vr || ev.forceVR) {
       this.wireframe = false
+      this.vr = !!ev.forceVR
 
       const { scene } = this.three
       this.objects.forEach(object => {
@@ -548,7 +597,14 @@ class Editor extends Component {
       // this.shapeObjects.forEach(object => scene.remove(object))
 
       this.initEffects()
+      this.handleResize()
       this.setState({})
+    }
+  }
+  switchToVR() {
+    if (!this.vr) {
+      // this.switchToWireframe({forceVR: true})
+      this.switchToModel({forceVR: true})
     }
   }
   // autofocus(ev) {
@@ -638,8 +694,13 @@ class Editor extends Component {
     TWEEN.update()
 
     controls.update()
-    renderer.clear()
-    composer.render(0.01)
+
+    if (this.vr) {
+      this.stereoEffect.render(scene, camera)
+    } else {
+      renderer.clear()
+      composer.render(0.01)
+    }
   }
   renderLoop() {
     requestAnimationFrame(this.renderLoop)
@@ -664,14 +725,17 @@ class Editor extends Component {
 
       <div className='control-bar fixed bottom-0 left-0 white w-100 z-999 pv3 ph4 flex items-end justify-between'>
         <div className="flex items-center">
-
-          <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${this.wireframe ? '' : 'b--dark-gray'}`} onClick={this.switchToWireframe}>
-            <i className="material-icons">border_clear</i>
+          <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${(this.wireframe || this.vr) ? 'b--dark-gray' : ''}`} onClick={this.switchToModel}>
+            <i className="material-icons">brightness_1</i>
+            <span className="f7 mb1">Body</span>
+          </a>
+          <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${(this.wireframe && !this.vr) ? '' : 'b--dark-gray'}`} onClick={this.switchToWireframe}>
+            <i className="material-icons">blur_circular</i>
             <span className="f7 mb1">Frame</span>
           </a>
-          <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${this.wireframe ? 'b--dark-gray' : ''}`} onClick={this.switchToModel}>
-            <i className="material-icons">border_all</i>
-            <span className="f7 mb1">Body</span>
+          <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${!this.vr ? 'b--dark-gray' : ''}`} onClick={this.switchToVR}>
+            <i className="material-icons">vignette</i>
+            <span className="f7 mb1">VR</span>
           </a>
         </div>
 
