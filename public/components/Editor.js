@@ -47,33 +47,35 @@ THREE.FilmShader.fragmentShader = [
   "}"
 ].join("\n")
 
-THREE.StereoEffect = function ( renderer, composer ) {
+THREE.StereoEffect = function (renderer, composer, renderPass) {
   var _stereo = new THREE.StereoCamera()
   _stereo.aspect = 0.5
-  this.setEyeSeparation = function ( eyeSep ) {
+  this.setEyeSeparation = function (eyeSep) {
     _stereo.eyeSep = eyeSep
   }
-  this.setSize = function ( width, height ) {
+  this.setSize = function (width, height) {
     renderer.setSize( width, height )
   }
-  this.render = function ( scene, camera ) {
+  this.render = function (scene, camera) {
     scene.updateMatrixWorld()
-    if ( camera.parent === null ) camera.updateMatrixWorld()
+    if (camera.parent === null) camera.updateMatrixWorld()
     _stereo.update( camera )
     var size = renderer.getSize()
     if (renderer.autoClear) renderer.clear()
     renderer.setScissorTest(true)
     renderer.setScissor(0, 0, size.width / 2, size.height)
     renderer.setViewport(0, 0, size.width / 2, size.height)
-    renderer.render(scene, _stereo.cameraL)
+    renderPass.camera = _stereo.cameraL
+    // renderer.render(scene, _stereo.cameraL)
     // renderer.compile(scene, _stereo.cameraL)
-    // composer.render(0.01)
+    composer.render(0.01)
 
     renderer.setScissor(size.width / 2, 0, size.width / 2, size.height)
     renderer.setViewport(size.width / 2, 0, size.width / 2, size.height)
-    renderer.render(scene, _stereo.cameraR)
+    renderPass.camera = _stereo.cameraR
+    // renderer.render(scene, _stereo.cameraR)
     // renderer.compile(scene, _stereo.cameraR)
-    // composer.render(0.01)
+    composer.render(0.01)
   }
 }
 
@@ -152,12 +154,18 @@ class Editor extends Component {
     const camera = new THREE.PerspectiveCamera(50, width / height, 1, 10000)
     camera.lookAt(new THREE.Vector3())
 
-    const controls = new THREE.OrbitControls(camera, this.canvas)
-    controls.enableZoom = true
-    controls.enablePan = false
-    controls.enableDamping = true
-    controls.dampingFactor = 0.1
-    controls.rotateSpeed = 0.12
+    let controls
+
+    if (window.DeviceOrientationEvent && /Mobi/.test(navigator.userAgent)) {
+      controls = new THREE.DeviceOrientationControls(camera)
+    } else {
+      controls = new THREE.OrbitControls(camera, this.canvas)
+      controls.enableZoom = true
+      controls.enablePan = false
+      controls.enableDamping = true
+      controls.dampingFactor = 0.1
+      controls.rotateSpeed = 0.12
+    }
 
     const raycaster = new THREE.Raycaster()
 
@@ -259,10 +267,11 @@ class Editor extends Component {
 
     renderer.setScissor(0, 0, window.innerWidth, window.innerHeight)
     const composer = new THREE.EffectComposer(renderer)
+
     let effect
 
-    effect = new THREE.RenderPass(scene, camera)
-    composer.addPass(effect)
+    const renderPass = new THREE.RenderPass(scene, camera)
+    composer.addPass(renderPass)
 
     effect = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 1.1, 0.95)
     composer.addPass(effect)
@@ -315,7 +324,7 @@ class Editor extends Component {
     composer.addPass(effect)
 
     if (this.vr) {
-      const stereoEffect = new THREE.StereoEffect(renderer, composer)
+      const stereoEffect = new THREE.StereoEffect(renderer, composer, renderPass)
       stereoEffect.setSize(window.innerWidth, window.innerHeight)
       this.stereoEffect = stereoEffect
     }
@@ -387,9 +396,13 @@ class Editor extends Component {
     let { camera, controls } = this.three
     let camDirection = camera.getWorldDirection()
     let y = camera.position.y - camera.position.x / camDirection.x * camDirection.y
-    controls.target.set(0, y, 0)
-    controls.update()
 
+    if (controls.target) {
+      controls.target.set(0, y, 0)
+    } else {
+      controls.alphaOffsetAngle = 3
+    }
+    controls.update()
   }
   initModelScene(scene) {
     // set an initial scale for camera/controls
@@ -720,10 +733,12 @@ class Editor extends Component {
         <i className="material-icons mr2">hourglass_full</i>loading model...
       </div>}
 
-      <canvas className="view-canvas"
-              ref={canvas => this.canvas = canvas}/>
+      <canvas className="view-canvas" ref={canvas => this.canvas = canvas}/>
 
-      <div className='control-bar fixed bottom-0 left-0 white w-100 z-999 pv3 ph4 flex items-end justify-between'>
+      <div className='control-bar fixed bottom-0 left-0 white w-100 z-999 mb3 ph4 flex items-end justify-between'
+        onTouchMove={ev => ev.preventDefault()}
+        style={{height: 0}}>
+
         <div className="flex items-center">
           <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${(this.wireframe || this.vr) ? 'b--dark-gray' : ''}`} onClick={this.switchToModel}>
             <i className="material-icons">brightness_1</i>

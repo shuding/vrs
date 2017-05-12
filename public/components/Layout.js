@@ -41,6 +41,7 @@ require('three/examples/js/postprocessing/BokehPass')
 require('three/examples/js/postprocessing/OutlinePass')
 require('three/examples/js/postprocessing/UnrealBloomPass')
 require('three/examples/js/controls/OrbitControls')
+require('three/examples/js/controls/DeviceOrientationControls')
 
 import Link from 'next/link'
 import Head from 'next/head'
@@ -55,7 +56,7 @@ export default ({ children, title = 'VRS' }) =>
     <Head>
       <title>{title}</title>
       <meta charSet='utf-8' />
-      <meta name='viewport' content='initial-scale=1.0, width=device-width' />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet" />
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
       <style dangerouslySetInnerHTML={{ __html: tachyonsStyles + layoutStyles }} />
