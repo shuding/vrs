@@ -2,6 +2,19 @@
 
 TODO: 后端，前端逻辑层，NextJS 路由（？），聊天室（？？）
 
+## 功能
+- [x] 流量模型
+- [x] 查看模型框架（geometry + vertex + material）
+- [x] 控制器
+- [x] 视角转换
+- [x] VR 渲染
+- [x] 移动设备朝向检测（deviceorientation）
+- [x] Mesh face hover 检测
+  - [ ] 组件 popup
+  - [ ] 定制 material
+- [ ] gallery __thumbnail__
+- [ ] oneclick: 服务端模型接口 + chat 集成 +（待考虑）订单系统
+
 ## Quickstart
 开发环境：`yarn dev` / `npm run dev`
 产品环境：`yarn start` / `npm start`
