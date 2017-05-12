@@ -380,6 +380,7 @@ class Editor extends Component {
       let object = scene.children.pop()
       if (object) {
         object.position.setY(object.position.y - bBox.min.y)
+        object.position.setX(object.position.x - (bBox.max.x + bBox.min.x) * .5)
         object.castShadow = true
         object.receiveShadow = false
         group.add(object)
@@ -661,7 +662,7 @@ class Editor extends Component {
       <canvas className="view-canvas"
               ref={canvas => this.canvas = canvas}/>
 
-      <div className='control-bar fixed bottom-0 white w-100 z-999 pv3 ph4 flex items-end justify-between'>
+      <div className='control-bar fixed bottom-0 left-0 white w-100 z-999 pv3 ph4 flex items-end justify-between'>
         <div className="flex items-center">
 
           <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${this.wireframe ? '' : 'b--dark-gray'}`} onClick={this.switchToWireframe}>
