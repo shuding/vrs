@@ -13,7 +13,7 @@
                 "matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0.1474,0,-0.16,1],
                 "visible": true,
                 "type": "Mesh",
-                "material": "6E550C36-6AE6-31B4-91D2-41D1909F6632",
+                "material": ["6E550C36-6AE6-31B4-91D2-41D1909F6632", "3AC4CA3A-C0D4-340D-AE63-16AB48526896"],
                 "castShadow": true,
                 "receiveShadow": true,
                 "geometry": "8EA643F8-2648-30C2-86F6-AD9EADE2B1C4"

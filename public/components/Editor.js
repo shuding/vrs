@@ -93,7 +93,7 @@ class Editor extends Component {
     this.shapeObjects = []
 
     this.wireframe = false
-    this.pointOpacity = 0.7
+    this.pointOpacity = 0
 
     this.renderThree = this.renderThree.bind(this)
     this.rotateToLeftView = this.rotateToLeftView.bind(this)
@@ -102,10 +102,9 @@ class Editor extends Component {
     this.switchToWireframe = this.switchToWireframe.bind(this)
     this.switchToModel = this.switchToModel.bind(this)
     this.switchToVR = this.switchToVR.bind(this)
-    this.selectObject = this.selectObject.bind(this)
-    // this.autofocus = this.autofocus.bind(this)
     this.renderLoop = this.renderLoop.bind(this)
     this.handleResize = throttle(this.handleResize.bind(this), 100, false)
+    this.selectObject = throttle(this.selectObject.bind(this), 100, false)
   }
   componentDidMount() {
     window.addEventListener('resize', this.handleResize)
@@ -176,6 +175,7 @@ class Editor extends Component {
   }
   initMaterials() {
     const shapeMaterial = new THREE.ShaderMaterial( {
+      name: 'shapeMaterial',
       uniforms: {},
       vertexShader: `
       attribute vec3 center;
@@ -201,14 +201,16 @@ class Editor extends Component {
 				gl_FragColor.a = 1.0;
       }
       `,
-      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
     })
     shapeMaterial.extensions.derivatives = true
 
-    const wireFrameMaterial = new THREE.MeshDepthMaterial({
+    const wireframeMaterial = new THREE.MeshDepthMaterial({
+      name: 'wireframeMaterial',
       wireframe: true,
       opacity: 0,
-      transparent: true
+      transparent: true,
+      blending: THREE.MultiplyBlending
     })
 
     let textureLoader = new THREE.TextureLoader()
@@ -218,13 +220,14 @@ class Editor extends Component {
       sizeAttenuation: false,
       map: sprite,
       transparent: true,
-      opacity: this.pointOpacity
+      opacity: this.pointOpacity,
+      blending: THREE.NormalBlending
     })
     // pointsMaterial.color.setRGB(.5, 1.0, .5)
     pointsMaterial.color.setRGB(1, 1, 1)
 
     this.materials.shapeMaterial = shapeMaterial
-    this.materials.wireFrameMaterial = wireFrameMaterial
+    this.materials.wireframeMaterial = wireframeMaterial
     this.materials.pointsMaterial = pointsMaterial
   }
   initScene() {
@@ -253,7 +256,7 @@ class Editor extends Component {
       textureHeight: window.innerHeight,
       color: 0x333333
     })
-    groundMirror.rotateX(- Math.PI / 2 )
+    groundMirror.rotateX(-Math.PI / 2 )
     groundMirror.translateZ(-0.1)
     scene.add(groundMirror)
 
@@ -273,7 +276,7 @@ class Editor extends Component {
     const renderPass = new THREE.RenderPass(scene, camera)
     composer.addPass(renderPass)
 
-    effect = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 1.1, 0.95)
+    effect = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.2, 1, 0.95)
     composer.addPass(effect)
 
     let hblur = new THREE.ShaderPass( THREE.HorizontalTiltShiftShader )
@@ -281,7 +284,7 @@ class Editor extends Component {
     let blur = 1
     hblur.uniforms[ 'h' ].value = blur / window.innerWidth
     vblur.uniforms[ 'v' ].value = blur / window.innerHeight
-    hblur.uniforms[ 'r' ].value = vblur.uniforms[ 'r' ].value = 0.6
+    hblur.uniforms[ 'r' ].value = vblur.uniforms[ 'r' ].value = 0.55
     composer.addPass(vblur)
     composer.addPass(hblur)
 
@@ -316,6 +319,10 @@ class Editor extends Component {
       effect = new THREE.FilmPass(0.25, 0.4, 1500, false)
       composer.addPass(effect)
     }
+
+    effect = new THREE.ShaderPass(THREE.FXAAShader)
+    effect.uniforms["resolution"].value = new THREE.Vector2(1 / window.innerWidth, 1 / window.innerHeight)
+    composer.addPass(effect)
 
     effect = new THREE.ShaderPass(THREE.VignetteShader)
     effect.uniforms["offset"].value = 0.5
@@ -356,7 +363,7 @@ class Editor extends Component {
     // composer.addPass(effect)
 
     // const bokehPass = new THREE.BokehPass(scene, camera, {
-    //   focus: 		0.5,
+    //   focus: 		0.9,
     //   aperture:	0.01,
     //   maxblur:	40.0,
     //   width: window.innerWidth,
@@ -484,17 +491,17 @@ class Editor extends Component {
           pointsGeo.vertices.push(child.geometry.vertices[i])
           ++verticesCnt
         }
-        child.material = this.materials.wireFrameMaterial
+        child.material = this.materials.wireframeMaterial
 
         let points = new THREE.Points(pointsGeo, this.materials.pointsMaterial)
         child.add(points)
       }
     })
-    this.pointOpacity = Math.max(500 / verticesCnt, 0.12)
+    this.pointOpacity = Math.min(Math.max(500 / verticesCnt, 0.12), 1)
     this.materials.pointsMaterial.opacity = this.pointOpacity
 
     this.wireframeObjects.push(wireframeClone)
-    scene.add(wireframeClone)
+    // scene.add(wireframeClone)
 
     let shapeClone = object.clone()
     shapeClone.traverse((child) => {
@@ -518,17 +525,24 @@ class Editor extends Component {
         child.material = this.materials.shapeMaterial
       }
     })
-
     this.shapeObjects.push(shapeClone)
-    scene.add(shapeClone)
+    // scene.add(shapeClone)
 
+    let changeMaterial = material => {
+      material.name = 'objectMaterial'
+      material.polygonOffset = true
+      material.polygonOffsetFactor = -0.1
+      material.vertexColors = THREE.FaceColors
+      material.transparent = true
+      material.opacity = 1
+    }
     object.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        child.material.polygonOffset = true
-        child.material.polygonOffsetFactor = -0.1
-        child.material.vertexColors = THREE.FaceColors
-        child.material.transparent = true
-        child.material.opacity = 0.8
+        if (child.material instanceof Array) {
+          child.material.forEach(changeMaterial)
+        } else {
+          changeMaterial(child.material)
+        }
       }
     })
     this.objects.push(object)
@@ -571,19 +585,27 @@ class Editor extends Component {
       this.wireframe = true
       this.vr = !!ev.forceVR
 
-      const { scene } = this.three
+      let {scene} = this.three
+
+      let changeMaterial = material => {
+        material.transparent = true
+        material.opacity = 0
+      }
       this.objects.forEach(object => {
         object.traverse((child) => {
           if (child instanceof THREE.Mesh) {
-            child.material.transparent = true
-            child.material.opacity = 0//0.4
+            if (child.material instanceof Array) {
+              child.material.forEach(changeMaterial)
+            } else {
+              changeMaterial(child.material)
+            }
           }
         })
       })
       this.materials.pointsMaterial.color.setRGB(.5, 1.0, .5)
       this.materials.pointsMaterial.opacity = 1
-      // this.wireframeObjects.forEach(object => scene.add(object))
-      // this.shapeObjects.forEach(object => scene.add(object))
+      this.wireframeObjects.forEach(object => scene.add(object))
+      this.shapeObjects.forEach(object => scene.add(object))
 
       this.initEffects()
       this.handleResize()
@@ -595,19 +617,26 @@ class Editor extends Component {
       this.wireframe = false
       this.vr = !!ev.forceVR
 
-      const { scene } = this.three
+      let {scene} = this.three
+
+      let changeMaterial = material => {
+        material.opacity = 1
+      }
       this.objects.forEach(object => {
         object.traverse((child) => {
           if (child instanceof THREE.Mesh) {
-            // child.material.transparent = false
-            child.material.opacity = 0.8
+            if (child.material instanceof Array) {
+              child.material.forEach(changeMaterial)
+            } else {
+              changeMaterial(child.material)
+            }
           }
         })
       })
-      this.materials.pointsMaterial.color.setRGB(1, 1, 1)
-      this.materials.pointsMaterial.opacity = this.pointOpacity
-      // this.wireframeObjects.forEach(object => scene.remove(object))
-      // this.shapeObjects.forEach(object => scene.remove(object))
+      // this.materials.pointsMaterial.color.setRGB(1, 1, 1)
+      // this.materials.pointsMaterial.opacity = this.pointOpacity
+      this.wireframeObjects.forEach(object => scene.remove(object))
+      this.shapeObjects.forEach(object => scene.remove(object))
 
       this.initEffects()
       this.handleResize()
@@ -654,8 +683,15 @@ class Editor extends Component {
   //   }
   // }
   selectObject(ev) {
-    if (!this.wireframe) return
+    if (this.vr || this.wireframe) {
+      if (this.selectedObjectData) {
+        this.selectedObjectData = null
+        this.setState({})
+      }
+      return
+    }
 
+    ev.persist()
     const { camera, raycaster, scene } = this.three
     const mouse = { x: (ev.pageX / window.innerWidth) * 2 - 1, y: -(ev.pageY / window.innerHeight) * 2 + 1 }
 
@@ -671,6 +707,9 @@ class Editor extends Component {
       if (intersects[i].object.geometry instanceof THREE.BufferGeometry) {
         continue
       }
+      if (intersects[i].object instanceof THREE.Mesh && intersects[i].object.material.name !== 'objectMaterial') {
+        continue
+      }
       if (!selectedObject) {
         selectedObject = intersects[i]
       } else {
@@ -682,19 +721,49 @@ class Editor extends Component {
 
     if (selectedObject) {
       if (selectedObject.object instanceof THREE.Mesh) {
-        if (selectedObject.face !== this.highlightedFace) {
-          if (this.highlightedFace) {
+        // if (selectedObject.face !== this.highlightedFace) {
+        //   if (this.highlightedFace) {
+        //     this.highlightedObject.geometry.colorsNeedUpdate = true
+        //     this.highlightedFace.color.setRGB(1, 1, 1)
+        //   }
+        //   this.highlightedFace = selectedObject.face
+        //   this.highlightedObject = selectedObject.object
+        //   selectedObject.face.color.setRGB(2, 2, 2)
+        //   selectedObject.object.geometry.colorsNeedUpdate = true
+        // }
+
+        let {material} = selectedObject.object
+
+        if (selectedObject !== this.highlightedObject) {
+          if (this.highlightedObject) {
             this.highlightedObject.geometry.colorsNeedUpdate = true
-            this.highlightedFace.color.setRGB(1, 1, 1)
+            this.highlightedObject.material.wireframe = false
           }
-          this.highlightedFace = selectedObject.face
           this.highlightedObject = selectedObject.object
-          selectedObject.face.color.setRGB(2, 2, 2)
-          selectedObject.object.geometry.colorsNeedUpdate = true
+          material.wireframe = true
+        }
+
+        if (material.map instanceof THREE.Texture) {
+          let textureImage = material.map.image
+          console.log(textureImage.src)
+          this.selectedObjectData = {
+            texture: textureImage.src
+          }
+          this.setState({})
         }
       }
       // addSelectedObject(selectedObject)
       // if (typeof selectedObject === THREE.Mesh)
+    } else {
+      if (this.highlightedObject) {
+        this.highlightedObject.geometry.colorsNeedUpdate = true
+        this.highlightedObject.material.wireframe = false
+        this.highlightedObject = null
+      }
+      if (this.selectedObjectData) {
+        this.selectedObjectData = null
+        this.setState({})
+      }
     }
   }
 
@@ -721,9 +790,7 @@ class Editor extends Component {
   }
 
   render() {
-
-    // onMouseMove={this.selectObject}
-
+    let {selectedObjectData} = this
     return <div style={{ display: 'flex' }}>
       <Head>
         <style dangerouslySetInnerHTML={{ __html: editorStyles }} />
@@ -733,7 +800,19 @@ class Editor extends Component {
         <i className="material-icons mr2">hourglass_full</i>loading model...
       </div>}
 
-      <canvas className="view-canvas" ref={canvas => this.canvas = canvas}/>
+      <canvas className="view-canvas"
+              ref={canvas => this.canvas = canvas}
+              onClick={this.selectObject}
+              onMouseMove={ev => {
+                ev.persist()
+                this.selectObject(ev)
+              }}/>
+
+      {
+        selectedObjectData && <div className="fixed setting-panel right-0 ma2">
+          <img src={selectedObjectData.texture}/>
+        </div>
+      }
 
       <div className='control-bar fixed bottom-0 left-0 white w-100 z-999 mb3 ph4 flex items-end justify-between'
         onTouchMove={ev => ev.preventDefault()}
@@ -752,9 +831,6 @@ class Editor extends Component {
             <i className="material-icons">vignette</i>
             <span className="f7 mb1">VR</span>
           </a>
-        </div>
-
-        <div>
         </div>
 
         <div className="key-info flex items-end">

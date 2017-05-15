@@ -106,7 +106,7 @@ class Slider extends Component {
                   // effect.renderToScreen = true
                   this.composer.addPass(effect)
 
-                  effect = new THREE.ShaderPass(THREE.EdgeShader)
+                  effect = new THREE.ShaderPass(THREE.EdgeShader2)
                   effect.uniforms.aspect.value = new THREE.Vector2(500, 500)
                   effect.renderToScreen = true
                   this.composer.addPass(effect)

@@ -24,7 +24,7 @@
                 "visible": true,
                 "type": "HemisphereLight",
                 "color": 3376639,
-                "intensity": 0.6,
+                "intensity": 0.4,
                 "distance": 0
             },{
                 "name": "Sun_Light",
@@ -34,7 +34,7 @@
                 "type": "DirectionalLight",
                 "castShadow": false,
                 "color": 16774373,
-                "intensity": 1,
+                "intensity": 0.8,
                 "distance": 0
             }]
         },{

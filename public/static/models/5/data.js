@@ -1430,7 +1430,7 @@
                 "type": "DirectionalLight",
                 "castShadow": false,
                 "color": 15062196,
-                "intensity": 0.85,
+                "intensity": 0.55,
                 "distance": 0
             },{
                 "name": "KeyLight",

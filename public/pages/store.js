@@ -7,7 +7,7 @@ import Link from 'next/link'
 import Layout from '../components/Layout'
 import Footer from '../components/Footer'
 
-const MODEL_NUM = 7
+const MODEL_NUM = 15
 
 export default () =>
   <Layout>
