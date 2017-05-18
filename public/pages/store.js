@@ -20,7 +20,7 @@ export default () =>
       <div className="cf pa2">
         {
           (Array(MODEL_NUM).fill(0).map((_, i) =>
-            <div className="fl w-50 w-25-m w-20-l pa2">
+            <div className="fl w-50 w-25-m w-20-l pa2" key={i}>
               <Link href={`/edit?id=${i + 1}`}>
                 <a className="db link dim tc">
                   <img src="/static/models/thumbnail.jpg" alt="Lorem" className="w-100 db outline black-10"/>

@@ -762,7 +762,7 @@ babel-register@^6.24.0, babel-register@^6.24.1:
     mkdirp "^0.5.1"
     source-map-support "^0.4.2"
 
-babel-runtime@6.23.0, babel-runtime@^6.0.0, babel-runtime@^6.18.0, babel-runtime@^6.20.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0:
+babel-runtime@6.23.0, babel-runtime@^6.0.0, babel-runtime@^6.18.0, babel-runtime@^6.20.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.9.2:
   version "6.23.0"
   resolved "http://registry.npm.taobao.org/babel-runtime/download/babel-runtime-6.23.0.tgz#0a9489f144de70efb3ce4300accdb329e2fc543b"
   dependencies:
@@ -3746,6 +3746,12 @@ react-proxy@^3.0.0-alpha.0:
   dependencies:
     lodash "^4.6.1"
 
+react-smooth-scrollbar@^7.2.2:
+  version "7.2.2"
+  resolved "http://registry.npm.taobao.org/react-smooth-scrollbar/download/react-smooth-scrollbar-7.2.2.tgz#bb49cb0b705c96c08368437b2eac797f1287f7a3"
+  dependencies:
+    smooth-scrollbar "^7.2.0"
+
 react@^15.5.4:
   version "15.5.4"
   resolved "http://registry.npm.taobao.org/react/download/react-15.5.4.tgz#fa83eb01506ab237cdc1c8c3b1cea8de012bf047"
@@ -4072,6 +4078,12 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
 slash@^1.0.0:
   version "1.0.0"
   resolved "http://registry.npm.taobao.org/slash/download/slash-1.0.0.tgz#c41f2f6c39fc16d1cd17ad4b5d896114ae470d55"
+
+smooth-scrollbar@^7.2.0:
+  version "7.2.10"
+  resolved "http://registry.npm.taobao.org/smooth-scrollbar/download/smooth-scrollbar-7.2.10.tgz#bb3280da27795a77766c08297fdaee799aafe1a0"
+  dependencies:
+    babel-runtime "^6.9.2"
 
 sntp@1.x.x:
   version "1.0.9"

@@ -29,13 +29,13 @@ export default () =>
               }
               switch (Router.router.pathname) {
                 case '/store':
-                  return <span>V R S<br/>STORE</span>
+                  return <span>V R S</span>
                 case '/edit':
-                  return <span>V R S<br/>EDITOR</span>
+                  return <span>V R S</span>
                 case '/about':
-                  return <span>V R S<br/>ABOUT</span>
+                  return <span>V R S</span>
                 default:
-                  return 'V R S'
+                  return <span>V R S</span>
               }
             })()
           }

@@ -26,14 +26,17 @@ class Slider extends Component {
     this.scrollHandler = this.scrollHandler.bind(this)
   }
   componentDidMount() {
-    window.addEventListener('scroll', this.scrollHandler, false)
+    window.scrollHandlers = window.scrollHandlers || []
+    window.scrollHandlers.push(status => this.scrollHandler(status))
+
+    this.isMobi = (window.DeviceOrientationEvent && /Mobi/.test(navigator.userAgent))
   }
   componentWillUnmount() {
-    window.removeEventListener('scroll', this.scrollHandler)
+    this.scrollHandler = () => {}
   }
-  scrollHandler() {
+  scrollHandler(status) {
     this.setState({
-      offset: window.scrollY || 0
+      offset: status.offset.y || 0
     })
   }
   render() {
@@ -47,10 +50,6 @@ class Slider extends Component {
       </Head>
 
       <div className="slider-container">
-        <Page fixed={true}>
-          <SliderWave/>
-          <ScrollIcon key="scroll-icon"/>
-        </Page>
         <Page>
           <div className="absolute w-100 vh-100">
             <article className="vh-100 dt w-100">
@@ -74,7 +73,7 @@ class Slider extends Component {
             <article className="vh-100-l dt w-100 w-70-l" key="title-1">
               <div className="dtc v-mid white ph3 ph4-l">
                 {
-                  (offset < height * 2 + 100) ?
+                  (!this.isMobi && offset < height * 2 + 100) ?
                     <Motion defaultStyle={{y: height * .3}} style={{y: spring(height * .3 - offset * .3)}}>
                       {
                         style =>
@@ -87,8 +86,8 @@ class Slider extends Component {
               </div>
             </article>
             <article className="vh-100-l absolute-l top-0 right-0 dt w-100 w-50-l">
-              <div className="dtc v-mid tl-l tc" style={{ height: 600 }}>
-                <ShowBox width={Math.min(600, width)} height={600} composer={function () {
+              <div className="dtc v-mid tl-l tc">
+                <ShowBox width={Math.min(600, width)} height={Math.min(600, height * 0.6)} composer={function () {
                   let effect = new THREE.RenderPass(this.scene, this.camera)
                   effect.renderToScreen = true
                   this.composer.addPass(effect)
@@ -100,8 +99,8 @@ class Slider extends Component {
         <Page>
           <div className="absolute w-100 vh-100">
             <article className="vh-100-l dt w-100 absolute-l" style={{ mixBlendMode: 'screen' }}>
-              <div className="dtc v-mid tc" style={{ height: 600 }}>
-                <ShowBox width={Math.min(600, width)} height={600} composer={function () {
+              <div className="dtc v-mid tc">
+                <ShowBox width={Math.min(600, width)} height={Math.min(600, height * 0.6)} composer={function () {
                   let effect = new THREE.RenderPass(this.scene, this.camera)
                   // effect.renderToScreen = true
                   this.composer.addPass(effect)
@@ -116,7 +115,7 @@ class Slider extends Component {
             <article className="vh-100-l dt w-100" key="title-2">
               <div className="dtc v-mid white ph3 ph4-l">
                 {
-                  (offset > height - 100) ? <Motion defaultStyle={{y: height * .8}} style={{y: spring(height * .8 - offset * .4)}}>
+                  (!this.isMobi && offset > height - 100) ? <Motion defaultStyle={{y: height * .8}} style={{y: spring(height * .8 - offset * .4)}}>
                     {
                       style =>
                         <h2 className="f1 f2-m fw6 tc ttu" style={{
@@ -134,7 +133,7 @@ class Slider extends Component {
             <article className="vh-100-l dt w-100 w-70-l absolute-l top-0 right-0" key="title-3">
               <div className="dtc v-mid white ph3 ph4-l">
                 {
-                  (offset > height * 2 - 100) ?
+                  (!this.isMobi && offset > height * 2 - 100) ?
                     <Motion defaultStyle={{y:height}} style={{y: spring(height - offset * .33)}}>
                       {
                         style =>
@@ -147,8 +146,8 @@ class Slider extends Component {
               </div>
             </article>
             <article className="vh-100-l vh-75 dt w-100 w-50-l" style={{ mixBlendMode: 'screen' }}>
-              <div className="dtc v-mid tr-l tc" style={{ height: 600 }}>
-                <ShowBox width={Math.min(600, width)} height={600} composer={function () {
+              <div className="dtc v-mid tr-l tc">
+                <ShowBox width={Math.min(600, width)} height={Math.min(600, height * 0.6)} composer={function () {
                   let effect = new THREE.RenderPass(this.scene, this.camera)
                   // effect.renderToScreen = true
                   this.composer.addPass(effect)

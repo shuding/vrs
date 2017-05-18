@@ -16,10 +16,10 @@ export default class ScrollIcon extends Component {
       scrolled: false
     }
 
-    this.scrollHandler = _.debounce(this.scrollHandler, 50).bind(this)
+    this.scrollHandler = _.debounce(this.scrollHandler.bind(this), 50)
   }
-  scrollHandler () {
-    let scrolled = window.scrollY >= 10
+  scrollHandler (status) {
+    let scrolled = status.offset.y >= 10
 
     if (scrolled !== this.state.scrolled) {
       this.setState({
@@ -28,10 +28,11 @@ export default class ScrollIcon extends Component {
     }
   }
   componentDidMount() {
-    window.addEventListener('scroll', this.scrollHandler, false)
+    window.scrollHandlers = window.scrollHandlers || []
+    window.scrollHandlers.push(status => this.scrollHandler(status))
   }
   componentWillUnmount() {
-    window.removeEventListener('scroll', this.scrollHandler)
+    this.scrollHandler = () => {}
   }
   render () {
     let {scrolled} = this.state
@@ -99,7 +100,7 @@ export default class ScrollIcon extends Component {
           <path fill="rgba(255, 255, 255, .6)" d="M72.5,231h-15C25.794,231,0,205.206,0,173.5v-116C0,25.794,25.794,0,57.5,0h15 C104.206,0,130,25.794,130,57.5v116C130,205.206,104.206,231,72.5,231z M57.5,5C28.551,5,5,28.551,5,57.5v116 C5,202.448,28.551,226,57.5,226h15c28.948,0,52.5-23.552,52.5-52.5v-116C125,28.551,101.448,5,72.5,5H57.5z" />
         </g>
         <g id="mouse-circle">
-          <circle fill-rule="evenodd" clip-rule="evenodd" fill="#ffffff" cx="65" cy="42.834" r="12.5" />
+          <circle fillRule="evenodd" clipRule="evenodd" fill="#ffffff" cx="65" cy="42.834" r="12.5" />
         </g>
       </svg>
     </div>
