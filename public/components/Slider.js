@@ -63,7 +63,7 @@ class Slider extends Component {
                       }}>V R S</h2>
                   }
                 </Motion>
-                <i className="f5 tracked-mega-l">virtual reality shop</i>
+                <i className="f5 tracked-mega-l">virtual reality store</i>
               </div>
             </article>
           </div>

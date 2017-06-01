@@ -140,7 +140,7 @@ class Editor extends Component {
 
   // initializations
   initThree(width, height) {
-    const renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true, antialias: true })
+    const renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true, antialias: true, preserveDrawingBuffer: true })
     renderer.setClearColor(0x000000, 0)
     renderer.setPixelRatio(1)//window.devicePixelRatio || 1)
     renderer.setSize(width, height)
@@ -167,6 +167,12 @@ class Editor extends Component {
     }
 
     const raycaster = new THREE.Raycaster()
+
+    window.capturescreen = () => {
+      fetch(renderer.domElement.toDataURL('image/jpeg'))
+        .then(data => data.blob())
+        .then(blob => console.log(URL.createObjectURL(blob)))
+    }
 
     this.three.renderer = renderer
     this.three.camera = camera

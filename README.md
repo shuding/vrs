@@ -12,8 +12,12 @@ TODO: 后端，前端逻辑层，NextJS 路由（？），聊天室（？？）
 - [x] Mesh face hover 检测
   - [ ] 组件 popup
   - [ ] 定制 material
-- [ ] gallery __thumbnail__
+- [ ] gallery
+  - [ ] __thumbnail__
+  - [ ] 像淘宝一样
 - [ ] oneclick: 服务端模型接口 + chat 集成 +（待考虑）订单系统
+- [ ] 用户系统
+  - [ ] 用户后台界面
 
 ## Quickstart
 开发环境：`yarn dev` / `npm run dev`
@@ -23,9 +27,11 @@ BE + production on port 3000
 FE + development on port 8080
 
 ## 搭建环境
-Node.js >= ??
+Node.js >= 6
 
 ## 设计
+
+### BE
 
 ### Frontend
 需求：react，isomorphic，hot-reload，漂亮的错误信息，bundle splitting, react-router
@@ -33,6 +39,7 @@ Node.js >= ??
 Tech keywords: boilerplate (-> zeit/next)
 
 ### Frontend routers
+Next.js (not RESTful)
 
 ### UI
 自定义风格，black，futurism，spring animation。

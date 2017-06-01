@@ -19,7 +19,7 @@ export default () =>
       <style dangerouslySetInnerHTML={{__html: NProgressStyles + '#nprogress .peg { display: none } #nprogress .bar { background: white; height: 3px; z-index: 10000; }'}} />
     </Head>
     <nav className="f6 fw6 ttu tracked dt-l w-100 mw8 center">
-      <div className="w-100 w-10-l dtc-l tc tl-l">
+      <div className="w-100 w-10-l dtc-l tc tl-l v-mid">
         <Link href="/">
           <a className="link dim white dib mr3" title="Home">
           {
