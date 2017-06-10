@@ -12,6 +12,8 @@ import throttle from 'lodash/throttle'
 
 import editorStyles from '../styles/editor.less'
 
+import EditorSidebar from './EditorSidebar'
+
 // utils
 const traverse = (object, callback) => {
   if (object && typeof object.children !== 'undefined') {
@@ -23,6 +25,26 @@ const traverse = (object, callback) => {
     callback(object)
   }
 }
+
+const objectFocus = object => {
+  let materials = object.material instanceof Array ? object.material : [object.material]
+  materials.forEach(material => {
+    // material.wireframe = true
+    // material.opacity = 0.5
+    // material.transparent = true
+  })
+}
+
+const objectBlur = object => {
+  let materials = object.material instanceof Array ? object.material : [object.material]
+  materials.forEach(material => {
+    // material.wireframe = false
+    // material.opacity = 1
+    // material.transparent = false
+  })
+}
+
+// end utils
 
 THREE.FilmShader.fragmentShader = [
   "#include <common>",
@@ -60,7 +82,7 @@ THREE.StereoEffect = function (renderer, composer, renderPass) {
     scene.updateMatrixWorld()
     if (camera.parent === null) camera.updateMatrixWorld()
     _stereo.update( camera )
-    var size = renderer.getSize()
+    let size = renderer.getSize()
     if (renderer.autoClear) renderer.clear()
     renderer.setScissorTest(true)
     renderer.setScissor(0, 0, size.width / 2, size.height)
@@ -103,11 +125,15 @@ class Editor extends Component {
     this.switchToModel = this.switchToModel.bind(this)
     this.switchToVR = this.switchToVR.bind(this)
     this.renderLoop = this.renderLoop.bind(this)
+    this.selectObject = this.selectObject.bind(this)
+    this.changeObjectColor = this.changeObjectColor.bind(this)
     this.handleResize = throttle(this.handleResize.bind(this), 100, false)
-    this.selectObject = throttle(this.selectObject.bind(this), 100, false)
+    this.hoverObject = throttle(this.hoverObject.bind(this), 100, false)
   }
   componentDidMount() {
     window.addEventListener('resize', this.handleResize)
+
+    this.isMob = window.DeviceOrientationEvent && /Mobi/.test(navigator.userAgent)
 
     this.initThree(window.innerWidth, window.innerHeight)
     this.initScene()
@@ -155,7 +181,7 @@ class Editor extends Component {
 
     let controls
 
-    if (window.DeviceOrientationEvent && /Mobi/.test(navigator.userAgent)) {
+    if (this.isMob) {
       controls = new THREE.DeviceOrientationControls(camera)
     } else {
       controls = new THREE.OrbitControls(camera, this.canvas)
@@ -326,6 +352,10 @@ class Editor extends Component {
       composer.addPass(effect)
     }
 
+    const outlineEffect = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera)
+    // outlineEffect.renderToScreen = true
+    composer.addPass(outlineEffect)
+
     effect = new THREE.ShaderPass(THREE.FXAAShader)
     effect.uniforms["resolution"].value = new THREE.Vector2(1 / window.innerWidth, 1 / window.innerHeight)
     composer.addPass(effect)
@@ -380,6 +410,7 @@ class Editor extends Component {
 
     // this.bokehPass = bokehPass
     // this.outlinePass = outlinePass
+    this.outlineEffect = outlineEffect
 
     this.three.composer = composer
   }
@@ -443,6 +474,7 @@ class Editor extends Component {
       z: -dist * 1.5
     }, 1200).start()
 
+    this.initialScale = scaleRatio
     this.initialPosition = new THREE.Vector3(pos.x + dist * 0.3, pos.y + dist * 0.3, -dist * 1.5)
     this.initModelControls()
 
@@ -465,6 +497,7 @@ class Editor extends Component {
     // move y-axis, normalize size
     group.rotation.copy(scene.rotation)
     group.scale.set(scaleRatio, scaleRatio, scaleRatio)
+    this.modelGroup = group
     this.initModelObject(group)
   }
   initModelCamera(object, scaleRatio) {
@@ -479,6 +512,7 @@ class Editor extends Component {
     camera.rotation.copy(object.rotation)
     camera.updateProjectionMatrix()
     this.initialPosition = camera.position.clone()
+    this.initialRotation = camera.rotation.clone()
 
     this.initModelControls()
   }
@@ -689,9 +723,29 @@ class Editor extends Component {
   //   }
   // }
   selectObject(ev) {
+    if (this.mousemoved) {
+      return
+    }
+    if (this.selectedObject) {
+      this.outlineEffect.selectedObjects = []
+    }
+    if (!this.hoveredObjectData) {
+      this.selectedObject = null
+      this.selectedObjectData = null
+      this.selected = false
+      this.setState({})
+      return
+    }
+    this.selectedObject = this.highlightedObject
+    this.selectedObjectData = this.hoveredObjectData
+    this.selected = true
+    this.outlineEffect.selectedObjects = [this.selectedObject]
+    this.setState({})
+  }
+  hoverObject(ev) {
     if (this.vr || this.wireframe) {
-      if (this.selectedObjectData) {
-        this.selectedObjectData = null
+      if (this.hoveredObjectData) {
+        this.hoveredObjectData = null
         this.setState({})
       }
       return
@@ -707,13 +761,16 @@ class Editor extends Component {
     let selectedObject = null
 
     for (let i = 0; i < intersects.length; ++i) {
-      if (intersects[i].object instanceof THREE.Points || intersects[i].object instanceof THREE.GridHelper) {
+      if (intersects[i].object instanceof THREE.Points
+          || intersects[i].object instanceof THREE.GridHelper) {
         continue
       }
       if (intersects[i].object.geometry instanceof THREE.BufferGeometry) {
         continue
       }
-      if (intersects[i].object instanceof THREE.Mesh && intersects[i].object.material.name !== 'objectMaterial') {
+      if (intersects[i].object instanceof THREE.Mesh
+          && !(intersects[i].object.material instanceof Array)
+          && intersects[i].object.material.name !== 'objectMaterial') {
         continue
       }
       if (!selectedObject) {
@@ -727,6 +784,7 @@ class Editor extends Component {
 
     if (selectedObject) {
       if (selectedObject.object instanceof THREE.Mesh) {
+        document.body.style.cursor = 'pointer'
         // if (selectedObject.face !== this.highlightedFace) {
         //   if (this.highlightedFace) {
         //     this.highlightedObject.geometry.colorsNeedUpdate = true
@@ -740,35 +798,70 @@ class Editor extends Component {
 
         let {material} = selectedObject.object
 
-        if (selectedObject !== this.highlightedObject) {
+        if (selectedObject.object !== this.highlightedObject) {
           if (this.highlightedObject) {
             this.highlightedObject.geometry.colorsNeedUpdate = true
-            this.highlightedObject.material.wireframe = false
+            objectBlur(this.highlightedObject)
           }
           this.highlightedObject = selectedObject.object
-          material.wireframe = true
+          objectFocus(this.highlightedObject)
         }
 
-        if (material.map instanceof THREE.Texture) {
-          let textureImage = material.map.image
-          console.log(textureImage.src)
-          this.selectedObjectData = {
-            texture: textureImage.src
-          }
-          this.setState({})
+        if (!(material instanceof Array)) {
+          material = [material]
         }
+
+        let textures = [], colors = [], refractionRatios = [], shininesses = [], name = ''
+
+        material.forEach(mt => {
+          if (mt.map instanceof THREE.Texture) {
+            textures.push(mt.map.image.src)
+          }
+          if (mt.color) {
+            colors.push(mt.color)
+          }
+          refractionRatios.push(mt.refractionRatio || 0)
+          shininesses.push(mt.shininess || 0)
+        })
+        if (this.highlightedObject.name) {
+          name = this.highlightedObject.name
+        }
+
+        this.hoveredObjectData = {
+          textures, colors, name, refractionRatios, shininesses,
+          uuid: this.highlightedObject.uuid
+        }
+        this.setState({})
+      } else {
+        document.body.style.cursor = ''
       }
       // addSelectedObject(selectedObject)
       // if (typeof selectedObject === THREE.Mesh)
     } else {
+      document.body.style.cursor = ''
       if (this.highlightedObject) {
         this.highlightedObject.geometry.colorsNeedUpdate = true
-        this.highlightedObject.material.wireframe = false
+        objectBlur(this.highlightedObject)
         this.highlightedObject = null
       }
-      if (this.selectedObjectData) {
-        this.selectedObjectData = null
+      if (this.hoveredObjectData) {
+        this.hoveredObjectData = null
         this.setState({})
+      }
+    }
+  }
+  changeObjectColor(color, index) {
+    // TODO
+    if (this.selectedObject) {
+      this.selectedObject.geometry.colorsNeedUpdate = true
+      let {material} = this.selectedObject
+      if (!(material instanceof Array)) {
+        material = [material]
+      }
+      material[index].color = {
+        r: color.rgb.r / 255,
+        g: color.rgb.g / 255,
+        b: color.rgb.b / 255
       }
     }
   }
@@ -809,14 +902,19 @@ class Editor extends Component {
       <canvas className="view-canvas"
               ref={canvas => this.canvas = canvas}
               onClick={this.selectObject}
+              onMouseDown={() => this.mousemoved = false}
               onMouseMove={ev => {
                 ev.persist()
-                this.selectObject(ev)
+                this.mousemoved = true
+                this.hoverObject(ev)
               }}/>
 
       {
-        selectedObjectData && <div className="fixed setting-panel right-0 ma2">
-          <img src={selectedObjectData.texture}/>
+        !this.isMob && selectedObjectData && <div className="absolute setting-panel white pa1">
+          <h2 className="f6 ma0 mb2 ttu">Customize component</h2>
+          <EditorSidebar
+            data={selectedObjectData}
+            changeColor={this.changeObjectColor}/>
         </div>
       }
 
@@ -825,21 +923,25 @@ class Editor extends Component {
         style={{height: 0}}>
 
         <div className="flex items-center">
-          <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${(this.wireframe || this.vr) ? 'b--dark-gray' : ''}`} onClick={this.switchToModel}>
+          <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${(this.wireframe || this.vr) ? 'b--transparent' : ''}`} onClick={this.switchToModel}>
             <i className="material-icons">brightness_1</i>
-            <span className="f7 mb1">Body</span>
+            <span className="ttu f7 mb1">Body</span>
           </a>
-          <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${(this.wireframe && !this.vr) ? '' : 'b--dark-gray'}`} onClick={this.switchToWireframe}>
+          <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${(this.wireframe && !this.vr) ? '' : 'b--transparent'}`} onClick={this.switchToWireframe}>
             <i className="material-icons">blur_circular</i>
-            <span className="f7 mb1">Frame</span>
+            <span className="ttu f7 mb1">Frame</span>
           </a>
-          <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${!this.vr ? 'b--dark-gray' : ''}`} onClick={this.switchToVR}>
+          <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${!this.vr ? 'b--transparent' : ''}`} onClick={this.switchToVR}>
             <i className="material-icons">vignette</i>
-            <span className="f7 mb1">VR</span>
+            <span className="ttu f7 mb1">VR</span>
           </a>
         </div>
 
-        <div className="key-info flex items-end">
+        <div>
+          <a className="pa1"><i className="material-icons v-mid">add_circle_outline</i> <span className="v-mid">Add to cart</span></a>
+        </div>
+
+        <div className="key-info flex items-end ml4">
           <div className='relative'>
             <a className="hover-gray absolute pointer left--2" onClick={this.rotateToLeftView}><i className="material-icons">arrow_forward</i></a>
             <a className="hover-gray absolute pointer top--2" onClick={this.rotateToTopView}><i className="material-icons">arrow_downward</i></a>

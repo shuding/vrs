@@ -57,13 +57,15 @@ class Slider extends Component {
                 <Motion defaultStyle={{y: -50, o: 0}} style={{y: spring(0), o: spring(1)}}>
                   {
                     style =>
-                      <h2 className="f1 fw6 tc ttu f-subheadline-l mb3" style={{
+                      <h2 className="f1 fw6 tc ttu f-subheadline-l mt0 mb3" style={{
                         transform: `translateY(${style.y}px)`,
                         opacity: style.o
                       }}>V R S</h2>
                   }
                 </Motion>
-                <i className="f5 tracked-mega-l">virtual reality store</i>
+                <p className="i f5 tracked-mega-l">virtual reality store</p>
+                <div className="ttu mt3 f4"><a className="dib ph2 pv1 fw6 white tracked-mega no-underline" href="/store">&gt; enter store &lt;</a></div>
+                <div className="ttu mt3 f5"><a className="dib ph2 pv1 fw6 white tracked-mega no-underline" href="/login">&gt; login &lt;</a></div>
               </div>
             </article>
           </div>

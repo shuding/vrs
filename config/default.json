@@ -2,10 +2,15 @@
   "port": 3000,
   "session": {
     "secret": "a_secret",
-    "resave": true
+    "resave": true,
+    "saveUninitialized": true
   },
   "socketio": {
     "pingInterval": 15000,
     "pingTimeout": 30000
-  }
+  },
+  "db": "mongodb://localhost/",
+  "domain": "http://www.example.com",
+  "TWITTER_CONSUMER_KEY": "",
+  "TWITTER_CONSUMER_SECRET": ""
 }
