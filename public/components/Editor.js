@@ -32,6 +32,8 @@ const objectFocus = object => {
     // material.wireframe = true
     // material.opacity = 0.5
     // material.transparent = true
+    material.colorBk = material.color
+    material.color = {r: 1.4, g: 1.4, b: 1.4}
   })
 }
 
@@ -41,6 +43,7 @@ const objectBlur = object => {
     // material.wireframe = false
     // material.opacity = 1
     // material.transparent = false
+    material.color = material.colorBk
   })
 }
 
@@ -117,6 +120,7 @@ class Editor extends Component {
     this.wireframe = false
     this.pointOpacity = 0
 
+    this.addToCart = this.addToCart.bind(this)
     this.renderThree = this.renderThree.bind(this)
     this.rotateToLeftView = this.rotateToLeftView.bind(this)
     this.rotateToFrontView = this.rotateToFrontView.bind(this)
@@ -164,6 +168,12 @@ class Editor extends Component {
     }
   }
 
+  addToCart() {
+    capturescreen().then(url => {
+      window.addToCart && window.addToCart(url)
+    })
+  }
+
   // initializations
   initThree(width, height) {
     const renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true, antialias: true, preserveDrawingBuffer: true })
@@ -195,9 +205,15 @@ class Editor extends Component {
     const raycaster = new THREE.Raycaster()
 
     window.capturescreen = () => {
-      fetch(renderer.domElement.toDataURL('image/jpeg'))
-        .then(data => data.blob())
-        .then(blob => console.log(URL.createObjectURL(blob)))
+      return new Promise(resolve => {
+        fetch(renderer.domElement.toDataURL('image/jpeg'))
+          .then(data => data.blob())
+          .then(blob => {
+            let blobURL = URL.createObjectURL(blob)
+            console.log(blobURL)
+            resolve(blobURL)
+          })
+      })
     }
 
     this.three.renderer = renderer
@@ -352,9 +368,9 @@ class Editor extends Component {
       composer.addPass(effect)
     }
 
-    const outlineEffect = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera)
+    // const outlineEffect = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera)
     // outlineEffect.renderToScreen = true
-    composer.addPass(outlineEffect)
+    // composer.addPass(outlineEffect)
 
     effect = new THREE.ShaderPass(THREE.FXAAShader)
     effect.uniforms["resolution"].value = new THREE.Vector2(1 / window.innerWidth, 1 / window.innerHeight)
@@ -410,7 +426,7 @@ class Editor extends Component {
 
     // this.bokehPass = bokehPass
     // this.outlinePass = outlinePass
-    this.outlineEffect = outlineEffect
+    // this.outlineEffect = outlineEffect
 
     this.three.composer = composer
   }
@@ -727,7 +743,7 @@ class Editor extends Component {
       return
     }
     if (this.selectedObject) {
-      this.outlineEffect.selectedObjects = []
+      // this.outlineEffect.selectedObjects = []
     }
     if (!this.hoveredObjectData) {
       this.selectedObject = null
@@ -739,7 +755,7 @@ class Editor extends Component {
     this.selectedObject = this.highlightedObject
     this.selectedObjectData = this.hoveredObjectData
     this.selected = true
-    this.outlineEffect.selectedObjects = [this.selectedObject]
+    // this.outlineEffect.selectedObjects = [this.selectedObject]
     this.setState({})
   }
   hoverObject(ev) {
@@ -918,9 +934,17 @@ class Editor extends Component {
         </div>
       }
 
-      <div className='control-bar fixed bottom-0 left-0 white w-100 z-999 mb3 ph4 flex items-end justify-between'
+      <div className='control-bar fixed bottom-0 left-0 white w-100 z-999 mb3 ph4 flex items-end content-end justify-around flex-wrap'
         onTouchMove={ev => ev.preventDefault()}
         style={{height: 0}}>
+
+        <div className="key-info flex items-end ml4">
+          <div className='relative'>
+            <a className="hover-gray absolute pointer left--2" onClick={this.rotateToLeftView}><i className="material-icons">arrow_forward</i></a>
+            <a className="hover-gray absolute pointer top--2" onClick={this.rotateToTopView}><i className="material-icons">arrow_downward</i></a>
+            <a className="hover-gray pointer" onClick={this.rotateToFrontView}><i className="material-icons">accessibility</i></a>
+          </div>
+        </div>
 
         <div className="flex items-center">
           <a className={`hover-gray pointer mr2 flex justify-center items-center flex-column br-100 w3 h3 ba ${(this.wireframe || this.vr) ? 'b--transparent' : ''}`} onClick={this.switchToModel}>
@@ -937,16 +961,8 @@ class Editor extends Component {
           </a>
         </div>
 
-        <div>
-          <a className="pa1"><i className="material-icons v-mid">add_circle_outline</i> <span className="v-mid">Add to cart</span></a>
-        </div>
-
-        <div className="key-info flex items-end ml4">
-          <div className='relative'>
-            <a className="hover-gray absolute pointer left--2" onClick={this.rotateToLeftView}><i className="material-icons">arrow_forward</i></a>
-            <a className="hover-gray absolute pointer top--2" onClick={this.rotateToTopView}><i className="material-icons">arrow_downward</i></a>
-            <a className="hover-gray pointer" onClick={this.rotateToFrontView}><i className="material-icons">accessibility</i></a>
-          </div>
+        <div className="mb3 mt4 nowrap pointer hover-gray">
+          <a className="pa1" onClick={this.addToCart}><i className="material-icons v-mid">add_circle_outline</i> <span className="v-mid">Add to cart</span></a>
         </div>
       </div>
     </div>

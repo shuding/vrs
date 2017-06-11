@@ -20,7 +20,6 @@ import expressSession from 'express-session'
 import compression from 'compression'
 import cors from 'cors'
 import passport from 'passport'
-import {OAuthStrategy as GoogleStrategy} from 'passport-google-oauth'
 import {Strategy as TwitterStrategy} from 'passport-twitter'
 
 // service related
@@ -40,6 +39,8 @@ export default () => {
   app.use(compression())
   app.use(cors({origin: ['*.shud.in', 'localhost:*', '127.0.0.1:*']}))
   app.use(serveFavicon(path.join(__dirname, '..', 'public', 'static', 'images', 'favicon.ico')))
+  app.use(passport.initialize())
+  app.use(passport.session())
 
   // GraphQL
   app.use('/api', expressGraphQL({
@@ -49,19 +50,21 @@ export default () => {
   }))
 
   // authenticate
+  passport.serializeUser((user, done) => done(null, user))
+  passport.deserializeUser((user, done) => done(null, user))
   passport.use(new TwitterStrategy({
       consumerKey: config.TWITTER_CONSUMER_KEY,
       consumerSecret: config.TWITTER_CONSUMER_SECRET,
       callbackURL: config.domain + "/auth/twitter/callback"
     },
     (token, tokenSecret, profile, done) => {
-      console.log(token, tokenSecret, profile)
       User.findOrCreate({
-        profile
-      }, function(err, user) {
-        if (err) {
-          return done(err)
-        }
+        id: profile.id,
+        name: profile.displayName,
+        login: profile.username,
+        avatar: profile.photos.length ? profile.photos[0].value : ''
+      }, (err, user) => {
+        if (err) { return done(err) }
         done(null, user)
       })
     }
@@ -71,6 +74,8 @@ export default () => {
     successRedirect: '/',
     failureRedirect: '/login'
   }))
+
+  // redirects
 
   server.listen(config.port)
 

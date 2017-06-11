@@ -61,10 +61,6 @@ import ScrollIcon from './ScrollIcon'
 import {Motion, spring} from 'react-motion'
 
 export default class Layout extends Component {
-  constructor(props) {
-    super(props)
-  }
-
   componentDidMount() {
     this.sbs = ScrollBar.initAll()
     if (window.scrollHandlers) {
@@ -72,6 +68,8 @@ export default class Layout extends Component {
         this.sbs[0].addListener(handler)
       })
     }
+    this.route = Router.router ? Router.router.pathname : ''
+    this.forceUpdate()
   }
 
   render() {
@@ -122,13 +120,13 @@ export default class Layout extends Component {
           style =>
             <div style={{opacity: style.o}}>
               {
-                Router.router && Router.router.pathname === '/' &&
-                <div className="slider-item slider-item-bg fixed">
-                  <SliderWave/>
-                  <ScrollIcon key="scroll-icon"/>
-                </div>
+                this.route === '/'
+                  && <div className="slider-item slider-item-bg fixed" key="slider-bg">
+                    <SliderWave/>
+                    <ScrollIcon key="scroll-icon"/>
+                  </div>
               }
-              <div className="container" data-scrollbar>{children}</div>
+              <div className="container" data-scrollbar key="container">{children}</div>
             </div>
         }
       </Motion>

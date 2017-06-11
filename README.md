@@ -1,6 +1,6 @@
 <p align="center">
   <img src ="doc/vrs-logo.png" alt="VRS"/>
-  <h1 align="center">VRS</h1>
+  <h3 align="center">VRS</h3>
 </p>
 
 ## Quickstart
@@ -16,17 +16,18 @@ Node.js >= 6
 ## 设计
 
 ### BE
+GraphQL + MongoDB + OAuth
 
 ### Frontend
-需求：react，isomorphic，hot-reload，漂亮的错误信息，bundle splitting, react-router
+react，isomorphic，hot-reload
 
 Tech keywords: boilerplate (-> zeit/next)
 
 ### Frontend routers
-Next.js (not RESTful)
+Next.js (!RESTful)
 
 ### UI
-自定义风格，black，futurism，spring animation。
+自定义风格，black，futurism，spring animations。
 
 Tech keywords：Tachyons, Less
 
@@ -35,10 +36,7 @@ Tech keywords：Tachyons, Less
 
 Tech keywords: GraphQL, Apollo/Relay
 
-### Collaboration
-Websocket。
-
-Tech keywords: socket.io
+### Collaboration (?)
 
 ## Acknowledgement
 ### 3D models
@@ -46,4 +44,4 @@ Tech keywords: socket.io
 ### Libraries
 
 ## License, etc.
-MIT licensed. By Shu Ding <ds303077135@gmail.com>.
+MIT licensed. By Shu Ding <g@shud.in>.

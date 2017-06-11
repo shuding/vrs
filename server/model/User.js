@@ -5,20 +5,20 @@
 import mongoose from 'mongoose'
 import findOrCreate from 'mongoose-findorcreate'
 
-const Mixed = mongoose.Schema.Types.Mixed
+// const Mixed = mongoose.Schema.Types.Mixed
 
 const User = new mongoose.Schema({
+  id: {
+    type: String
+  },
   name: {
+    type: String,
+  },
+  login: {
     type: String,
   },
   avatar: {
     type: String,
-  },
-  token: {
-    type: String,
-  },
-  profile: {
-    type: Mixed
   }
 })
 

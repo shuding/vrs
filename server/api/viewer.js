@@ -22,9 +22,14 @@ const query = {
   },
   resolve: (root, {}, req) => new Promise((resolve, reject) => {
     // TODO: connect to real DB
-    resolve({
-      id: ''
-    })
+    console.log(req.session)
+    let user = null
+    try {
+      user = req.session.passport.user
+    } catch (err) {
+      reject(err)
+    }
+    resolve(user)
   })
 }
 

@@ -11,8 +11,13 @@ import {
   GraphQLInt
 } from 'graphql'
 
+import User from '../model/User'
+
 // THE USER SCHEMA
-const ID_DESC = 'unique id of an user, using MongoDB\'s default ObjectID'
+const ID_DESC = 'ID of an user, unique, using MongoDB\'s default ObjectID'
+const NAME_DESC = 'username of an user, String'
+const LOGIN_DESC = 'login name of an user, unique, String'
+const AVATAR_DESC = 'avatar URL of an user, String'
 
 const type = new GraphQLObjectType({
   name: 'User',
@@ -21,7 +26,19 @@ const type = new GraphQLObjectType({
     id: {
       description: ID_DESC,
       type: new GraphQLNonNull(GraphQLString)
-    }
+    },
+    name: {
+      description: NAME_DESC,
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    login: {
+      description: LOGIN_DESC,
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    avatar: {
+      description: AVATAR_DESC,
+      type: GraphQLString
+    },
   })
 })
 
@@ -34,10 +51,10 @@ const query = {
     },
   },
   resolve: (root, {id}, req) => new Promise((resolve, reject) => {
-    // TODO: connect to real DB
-    resolve({
-      id
-    })
+    User
+      .findOne({id})
+      .then(user => resolve(user))
+      .catch(err => reject(err))
   })
 }
 
