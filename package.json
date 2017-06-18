@@ -29,6 +29,7 @@
     "express": "^4.15.2",
     "express-graphql": "^0.6.4",
     "express-session": "^1.15.2",
+    "faker": "^4.1.0",
     "graphql": "^0.9.6",
     "mongoose": "^4.10.5",
     "mongoose-findorcreate": "^2.0.0",

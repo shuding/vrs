@@ -65,7 +65,6 @@ class Slider extends Component {
                 </Motion>
                 <p className="i f5 tracked-mega-l">virtual reality store</p>
                 <div className="ttu mt3 f4"><a className="dib ph2 pv1 fw6 white tracked-mega no-underline" href="/store">&gt; enter store &lt;</a></div>
-                <div className="ttu mt3 f5"><a className="dib ph2 pv1 fw6 white tracked-mega no-underline" href="/login">&gt; login &lt;</a></div>
               </div>
             </article>
           </div>

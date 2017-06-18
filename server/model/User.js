@@ -9,13 +9,16 @@ import findOrCreate from 'mongoose-findorcreate'
 
 const User = new mongoose.Schema({
   id: {
-    type: String
+    type: String,
+    required: true
   },
   name: {
     type: String,
+    required: true
   },
   login: {
     type: String,
+    required: true
   },
   avatar: {
     type: String,

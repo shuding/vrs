@@ -29,21 +29,21 @@ const traverse = (object, callback) => {
 const objectFocus = object => {
   let materials = object.material instanceof Array ? object.material : [object.material]
   materials.forEach(material => {
-    // material.wireframe = true
-    // material.opacity = 0.5
+    material.wireframe = true
+    // material.opacity = 0.8
     // material.transparent = true
-    material.colorBk = material.color
-    material.color = {r: 1.4, g: 1.4, b: 1.4}
+    // material.colorBk = material.color
+    // material.color = {r: 1.4, g: 1.4, b: 1.4}
   })
 }
 
 const objectBlur = object => {
   let materials = object.material instanceof Array ? object.material : [object.material]
   materials.forEach(material => {
-    // material.wireframe = false
+    material.wireframe = false
     // material.opacity = 1
     // material.transparent = false
-    material.color = material.colorBk
+    // material.color = material.colorBk
   })
 }
 

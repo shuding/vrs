@@ -6,7 +6,7 @@
 const THREE = require('three/build/three')
 global.THREE = THREE
 
-// three.js polyfills
+// three.js polyfills...shit!
 require('three/examples/js/Mirror')
 require('three/examples/js/loaders/ColladaLoader2')
 require('three/examples/js/renderers/Projector')
@@ -118,7 +118,7 @@ export default class Layout extends Component {
       <Motion defaultStyle={{o: 0}} style={{o: spring(1)}}>
         {
           style =>
-            <div style={{opacity: style.o}}>
+            <div style={{opacity: style.o}} key="motion-content">
               {
                 this.route === '/'
                   && <div className="slider-item slider-item-bg fixed" key="slider-bg">

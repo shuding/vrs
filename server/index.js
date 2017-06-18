@@ -5,6 +5,7 @@
 // utils
 import config from 'config'
 import path from 'path'
+import fs from 'fs'
 
 // server
 import http from 'http'
@@ -24,6 +25,8 @@ import {Strategy as TwitterStrategy} from 'passport-twitter'
 
 // service related
 import schema from './api'
+import databaseInit from '../script/db-boilerplater'
+import modelInit from '../script/model-boilerplater'
 import User from './model/User'
 
 export default () => {
@@ -32,6 +35,9 @@ export default () => {
   const io = socketio(server, config.socketio)
 
   mongoose.connect(config.db)
+  if (!fs.existsSync(path.join(__dirname, '..', 'vrs.info'))) {
+    modelInit().then(databaseInit).then(() => console.log(`Finished initialization.`))
+  }
 
   // tools
   app.use(cookieParser())
