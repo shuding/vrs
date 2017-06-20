@@ -32,7 +32,7 @@ Next.js (!RESTful)
 Tech keywords：Tachyons, Less
 
 ### API
-主要基于 GraphQL。
+主要基于 GraphQL / express。
 
 Tech keywords: GraphQL, Apollo/Relay
 

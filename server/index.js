@@ -6,6 +6,7 @@
 import config from 'config'
 import path from 'path'
 import fs from 'fs'
+import co from 'co'
 
 // server
 import http from 'http'
@@ -80,6 +81,17 @@ export default () => {
     successRedirect: '/',
     failureRedirect: '/login'
   }))
+  app.post('/auth/admin', (req, res) => {
+    co(function *() {
+      let user = yield User.findOne({ name: 'test' })
+      // req.session
+      // TODO
+      res.redirect('/')
+    })
+  })
+  app.post('/auth/logout', (req, res) => {
+    res.redirect('/')
+  })
 
   // redirects
 

@@ -18,6 +18,7 @@ export default () =>
           </svg>
         </a>
         <br/>
+        <a href="/auth/admin" className="white">or have a try</a>
       </p>
     </main>
     <Footer/>
