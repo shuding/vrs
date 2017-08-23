@@ -2,7 +2,7 @@
   "scripts": {
     "dev": "next --p 8080",
     "build": "next build",
-    "build-static": "next export",
+    "build-static": "next build && next export",
     "start": "next start --p 8080"
   },
   "dependencies": {
@@ -28,7 +28,7 @@
     "css-loader": "^0.28.1",
     "less": "^2.7.2",
     "less-loader": "^4.0.3",
-    "next": "^2.3.1",
+    "next": "^3.0.6",
     "postcss-cssnext": "^2.10.0",
     "postcss-easy-import": "^2.0.0",
     "postcss-loader": "^1.3.3",

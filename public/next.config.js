@@ -31,5 +31,10 @@ module.exports = {
       path: '/model/:id',
       file: '/model'
     }
-  ]
+  ],
+  exportPathMap: function () {
+    return {
+      '/': { page: '/' }
+    }
+  }
 }
