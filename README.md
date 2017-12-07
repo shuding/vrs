@@ -3,17 +3,19 @@
   <h3 align="center">VRS</h3>
 </p>
 
+**(warning: this is a simple demo built for my Advanced Web course at FDU)**
+
 ## Quickstart
-开发环境：`yarn dev` / `npm run dev`
-产品环境：`yarn start` / `npm start`
+dev: `yarn dev` / `npm run dev`
+prod: `yarn start` / `npm start`
 
 BE + production on port 3000
 FE + development on port 8080
 
-## 搭建环境
+## Env
 Node.js >= 6
 
-## 设计
+## Design
 
 ### BE
 GraphQL + MongoDB + OAuth
@@ -27,12 +29,12 @@ Tech keywords: boilerplate (-> zeit/next)
 Next.js (!RESTful)
 
 ### UI
-自定义风格，black，futurism，spring animations。
+black，futurism，spring animations。
 
 Tech keywords：Tachyons, Less
 
 ### API
-主要基于 GraphQL / express。
+GraphQL / express。
 
 Tech keywords: GraphQL, Apollo/Relay
 
