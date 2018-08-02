@@ -434,7 +434,7 @@ class Editor extends Component {
   initModel() {
     const loader = new THREE.ObjectLoader()
 
-    const id = Router.query.id || this.props.id
+    const id = (new URL(window.location.href)).searchParams.get('id') || Router.query.id || this.props.id
     const modelPath = `/static/models/${id}/data.js`
 
     return new Promise(resolve => {

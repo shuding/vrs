@@ -37,7 +37,7 @@ module.exports = {
       '/': { page: '/' },
       '/about': { page: '/about' },
       '/store': { page: '/store' },
-      '/edit': { page: '/edit', query: { id: '12' } }
+      '/edit': { page: '/edit', query: { id: '12' } },
     }
   }
 }
