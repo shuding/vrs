@@ -34,7 +34,10 @@ module.exports = {
   ],
   exportPathMap: function () {
     return {
-      '/': { page: '/' }
+      '/': { page: '/' },
+      '/about': { page: '/about' },
+      '/store': { page: '/store' },
+      '/edit': { page: '/edit', query: { id: '12' } }
     }
   }
 }
