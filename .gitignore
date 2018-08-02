@@ -5,6 +5,7 @@
 
 node_modules
 public/.next
+public/out
 yarn-error.log
 npm-debug.log
 vrs.info

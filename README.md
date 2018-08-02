@@ -5,6 +5,8 @@
 
 **(warning: this is a simple demo built for my Advanced Web course at FDU)**
 
+Demo: [https://vrs.now.sh](https://vrs.now.sh)
+
 ## Quickstart
 dev: `yarn dev` / `npm run dev`
 prod: `yarn start` / `npm start`
@@ -24,6 +26,9 @@ GraphQL + MongoDB + OAuth
 react，isomorphic，hot-reload
 
 Tech keywords: boilerplate (-> zeit/next)
+
+#### Deploy frontend via Now
+`cd public` then `now`
 
 ### Frontend routers
 Next.js (!RESTful)
