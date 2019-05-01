@@ -5,7 +5,7 @@
 
 **(warning: this is a simple demo built for my Advanced Web course at FDU)**
 
-Demo: [https://vrs.now.sh](https://vrs.now.sh)
+Demo: [https://v-r-s.now.sh](https://v-r-s.now.sh)
 
 ## Quickstart
 dev: `yarn dev` / `npm run dev`
