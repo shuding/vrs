@@ -1,4 +1,4 @@
-**Update: this repo has been moved to [github.com/zeit/vrs](github.com/zeit/vrs).**
+**Update: this repo has been moved to [github.com/zeit/vrs](https://github.com/zeit/vrs).**
 
 ---
 
