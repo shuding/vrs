@@ -1,3 +1,7 @@
+**Update: this repo has been moved to [github.com/zeit/vrs](github.com/zeit/vrs).**
+
+---
+
 <p align="center">
   <img src ="doc/vrs-logo.png" alt="VRS"/>
   <h3 align="center">VRS</h3>
